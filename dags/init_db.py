@@ -1,10 +1,8 @@
 from datetime import datetime, timedelta
 from airflow import DAG
-from airflow.operators.python import PythonOperator
+from airflow.operators.bash import BashOperator
 
-# Define the Python function that will be run
-def run_python_script():
-    exec(open("/opt/airflow/executable/exec_init.py").read())
+
 
 default_args = {
     'owner': 'airflow',
@@ -19,9 +17,9 @@ with DAG('schema_init',
          schedule_interval=None,
          catchup=False) as dag:
 
-    run_init = PythonOperator(
+    run_init = BashOperator(
         task_id='run_schemaInit',
-        python_callable=run_python_script,
+        bash_command='python /opt/airflow/executable/exec_init.py ',
     )
 
 run_init

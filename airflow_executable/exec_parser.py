@@ -47,29 +47,31 @@ def insert_regular_season_stat_rankings(cur, team_id, team_name, stat, hashdiff)
     ))
 
 
-def run_parser():
-    url = 'https://statsapi.web.nhl.com/api/v1/teams/21/stats'
-    response = requests.get(url)
-    data = response.json()
 
-    with psycopg2.connect("host=postgresMain dbname=postgres user=postgres password=changeme port=5432") as conn:
-        with conn.cursor() as cur:
-            for stats in data['stats']:
-                type = stats['type']['displayName']
-                for splits in stats['splits']:
-                    team_id = splits['team']['id']
-                    team_name = splits['team']['name']
-                    stat = splits['stat']
-                    
-                    hashdiff = create_hash(stat)
-                    
-                    if type == 'statsSingleSeason':
-                        cur.execute("SELECT * FROM stats_single_season WHERE hashdiff = %s", (hashdiff,))
-                        if not cur.fetchone():
-                            insert_stats_single_season(cur, team_id, team_name, stat, hashdiff)
-                    elif type == 'regularSeasonStatRankings':
-                        cur.execute("SELECT * FROM regular_season_stat_rankings WHERE hashdiff = %s", (hashdiff,))
-                        if not cur.fetchone():
-                            insert_regular_season_stat_rankings(cur, team_id, team_name, stat, hashdiff)
+url = 'https://statsapi.web.nhl.com/api/v1/teams/21/stats'
+response = requests.get(url)
+data = response.json()
 
-    conn.commit()
+with psycopg2.connect("host=postgresMain dbname=postgres user=postgres password=changeme port=5432") as conn:
+    with conn.cursor() as cur:
+        for stats in data['stats']:
+            type = stats['type']['displayName']
+            for splits in stats['splits']:
+                team_id = splits['team']['id']
+                team_name = splits['team']['name']
+                stat = splits['stat']
+                
+                hashdiff = create_hash(stat)
+                
+                if type == 'statsSingleSeason':
+                    cur.execute("SELECT * FROM stats_single_season WHERE hashdiff = %s", (hashdiff,))
+                    if not cur.fetchone():
+                        insert_stats_single_season(cur, team_id, team_name, stat, hashdiff)
+                elif type == 'regularSeasonStatRankings':
+                    cur.execute("SELECT * FROM regular_season_stat_rankings WHERE hashdiff = %s", (hashdiff,))
+                    if not cur.fetchone():
+                        insert_regular_season_stat_rankings(cur, team_id, team_name, stat, hashdiff)
+
+
+
+conn.commit()

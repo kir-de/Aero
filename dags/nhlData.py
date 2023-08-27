@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from airflow import DAG
-from airflow.operators.python import PythonOperator
-from exec_parser import run_parser
+from airflow.operators.bash import BashOperator
+import sys
 
 default_args = {
     'owner': 'airflow',
@@ -16,9 +16,9 @@ with DAG('nhl_stats',
          schedule_interval=timedelta(hours=12),
          catchup=False) as dag:
 
-    run_parser_task = PythonOperator(
+    run_parser_task = BashOperator(
         task_id='run_NHLparser',
-        python_callable=run_parser,
+          bash_command='python /opt/airflow/executable/exec_parser.py ',
     )
 
 run_parser_task
