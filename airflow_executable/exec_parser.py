@@ -75,3 +75,5 @@ with psycopg2.connect("host=postgresMain dbname=postgres user=postgres password=
 
 
 conn.commit()
+cur.close()
+conn.close()
